@@ -8,7 +8,7 @@ import java.util.Random;
 public class FolderStructureGenerator {
 
     private static final String BASE_PATH = "src/main/resources";
-    private static final String[] BASE_FOLDERS = {"project", "images", "commands"};
+    private static final String[] BASE_FOLDERS = {"projects", "output", "commands"};
 
     private static final String[] FILE_NAMES = {
         "Readme", "Main", "Config", "Setup", "init", "App", "log", "notes",
