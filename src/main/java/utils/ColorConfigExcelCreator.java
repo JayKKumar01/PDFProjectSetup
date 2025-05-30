@@ -34,9 +34,8 @@ public class ColorConfigExcelCreator {
         // Create cell styles
         CellStyle headerStyle = createCellStyle(workbook, true, IndexedColors.GREY_25_PERCENT);
         CellStyle lockedStyle = createCellStyle(workbook, true, IndexedColors.LIGHT_CORNFLOWER_BLUE);
-        CellStyle warningStyle = createRedFontStyle(workbook, false, IndexedColors.WHITE);
-
         CellStyle unlockedStyle = createCellStyle(workbook, false, IndexedColors.WHITE);
+        CellStyle warningStyle = createRedFontStyle(workbook, true, IndexedColors.WHITE);
 
         DataValidationHelper dvHelper = sheet.getDataValidationHelper();
 
@@ -50,7 +49,6 @@ public class ColorConfigExcelCreator {
         colorHeader.setCellValue("Color");
         colorHeader.setCellStyle(headerStyle);
 
-
         // Row 1 → USE_DEFAULTS
         Row defaultRow = sheet.createRow(1);
         Cell defaultKey = defaultRow.createCell(0);
@@ -61,29 +59,26 @@ public class ColorConfigExcelCreator {
         defaultValue.setCellValue("TRUE");
         defaultValue.setCellStyle(unlockedStyle);
 
-        // Add TRUE/FALSE dropdown to USE_DEFAULTS
+        // TRUE/FALSE dropdown for USE_DEFAULTS
         CellRangeAddressList tfAddress = new CellRangeAddressList(1, 1, 1, 1);
         DataValidationConstraint tfConstraint = dvHelper.createExplicitListConstraint(new String[]{"TRUE", "FALSE"});
         DataValidation tfValidation = dvHelper.createValidation(tfConstraint, tfAddress);
         tfValidation.setShowErrorBox(true);
         sheet.addValidationData(tfValidation);
 
-        // Warning cell with formula in column C (index 2)
+        // Warning cell in column C (index 2)
         Cell warningCell = defaultRow.createCell(2);
         warningCell.setCellStyle(warningStyle);
-
-// Updated formula with trimming, uppercasing, and absolute refs
-        String formula = "IF(AND(TRIM(UPPER($B$2))=\"TRUE\", OR(" +
-                "TRIM(UPPER($B$4))<>\"RED\", " +
-                "TRIM(UPPER($B$5))<>\"GOLD\", " +
-                "TRIM(UPPER($B$6))<>\"MAGENTA\", " +
-                "TRIM(UPPER($B$7))<>\"BLUE\", " +
-                "TRIM(UPPER($B$8))<>\"CYAN\", " +
-                "TRIM(UPPER($B$9))<>\"BLACK\")), " +
-                "\"Change USE_DEFAULTS to FALSE to apply custom colors.\", \"\")";
-
-        warningCell.setCellFormula(formula);
-
+        warningCell.setCellFormula(
+                "IF(AND(TRIM(UPPER($B$2))=\"TRUE\", OR(" +
+                        "TRIM(UPPER($B$4))<>\"RED\", " +
+                        "TRIM(UPPER($B$5))<>\"GOLD\", " +
+                        "TRIM(UPPER($B$6))<>\"MAGENTA\", " +
+                        "TRIM(UPPER($B$7))<>\"BLUE\", " +
+                        "TRIM(UPPER($B$8))<>\"CYAN\", " +
+                        "TRIM(UPPER($B$9))<>\"BLACK\")), " +
+                        "\"❗ Change USE_DEFAULTS to FALSE to apply custom colors.\", \"\")"
+        );
 
         // Row 2 → Spacer
         sheet.createRow(2);
@@ -116,54 +111,30 @@ public class ColorConfigExcelCreator {
         }
 
         // Lock sheet
-        sheet.protectSheet("jay123");
+        sheet.protectSheet("pdfproject_password_not_guessable");
 
         // Auto-size columns for Key and Color
         sheet.autoSizeColumn(0);
         sheet.autoSizeColumn(1);
-        // Manually set width for Warning column to fit message (approx 55 characters)
-        sheet.setColumnWidth(2, 55 * 256); // width unit is 1/256th of a character
+
+        // Set column width for warning (approx 60 characters)
+        sheet.setColumnWidth(2, 60 * 256);
 
         try (FileOutputStream fos = new FileOutputStream("colors-config.xlsx")) {
             workbook.write(fos);
         }
 
         workbook.close();
-        System.out.println("✅ colors-config.xlsx created with modern look, zoom 150%, dropdowns, and improved warning.");
+        System.out.println("✅ colors-config.xlsx created with warning message and dropdown support.");
     }
 
     private static CellStyle createRedFontStyle(Workbook workbook, boolean locked, IndexedColors bgColor) {
         CellStyle style = workbook.createCellStyle();
         style.setLocked(locked);
 
-        // Borders (optional, same as others)
-        style.setBorderTop(BorderStyle.THIN);
-        style.setBorderBottom(BorderStyle.THIN);
-        style.setBorderLeft(BorderStyle.THIN);
-        style.setBorderRight(BorderStyle.THIN);
-
-        // Background color (optional, can be white or transparent)
+        // Background color
         style.setFillForegroundColor(bgColor.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        // Font with red color
-        Font font = workbook.createFont();
-        font.setFontName("Calibri");
-        font.setFontHeightInPoints((short) 11);
-        font.setColor(IndexedColors.RED.getIndex());  // Red font color
-        style.setFont(font);
-
-        // Alignment
-        style.setAlignment(HorizontalAlignment.LEFT);
-        style.setVerticalAlignment(VerticalAlignment.CENTER);
-
-        return style;
-    }
-
-
-    private static CellStyle createCellStyle(Workbook workbook, boolean locked, IndexedColors bgColor) {
-        CellStyle style = workbook.createCellStyle();
-        style.setLocked(locked);
 
         // Borders
         style.setBorderTop(BorderStyle.THIN);
@@ -171,9 +142,34 @@ public class ColorConfigExcelCreator {
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
 
-        // Background
+        // Font
+        Font font = workbook.createFont();
+        font.setFontName("Calibri");
+        font.setFontHeightInPoints((short) 12);
+        font.setColor(IndexedColors.RED.getIndex());
+        style.setFont(font);
+
+        // Text wrap and alignment
+        style.setWrapText(true);
+        style.setAlignment(HorizontalAlignment.LEFT);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        return style;
+    }
+
+    private static CellStyle createCellStyle(Workbook workbook, boolean locked, IndexedColors bgColor) {
+        CellStyle style = workbook.createCellStyle();
+        style.setLocked(locked);
+
+        // Background color
         style.setFillForegroundColor(bgColor.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        // Borders
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
 
         // Font
         Font font = workbook.createFont();
