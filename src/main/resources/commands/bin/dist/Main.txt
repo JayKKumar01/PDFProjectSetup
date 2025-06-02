@@ -1,1 +1,1 @@
-Sample content for Main.txt
+Sample content for MainClass.txt

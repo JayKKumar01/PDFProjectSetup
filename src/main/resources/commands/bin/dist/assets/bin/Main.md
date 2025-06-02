@@ -1,1 +1,1 @@
-Sample content for Main.md
+Sample content for MainClass.md

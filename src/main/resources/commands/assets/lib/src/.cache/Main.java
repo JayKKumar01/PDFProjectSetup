@@ -1,1 +1,1 @@
-Sample content for Main.java
+Sample content for MainClass.java

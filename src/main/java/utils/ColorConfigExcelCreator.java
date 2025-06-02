@@ -106,8 +106,10 @@ public class ColorConfigExcelCreator {
             DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
             validation.setShowErrorBox(true);
             sheet.addValidationData(validation);
+            createRowWarningCell(row, rowIndex, sheet, warningStyle, entry.getValue());
 
             rowIndex++;
+
         }
 
         // Lock sheet
@@ -127,6 +129,24 @@ public class ColorConfigExcelCreator {
         workbook.close();
         System.out.println("✅ colors-config.xlsx created with warning message and dropdown support.");
     }
+
+    private static void createRowWarningCell(Row row, int rowIndex, Sheet sheet, CellStyle warningStyle, String expectedColor) {
+        Cell warningCell = row.createCell(2); // Column C
+        warningCell.setCellStyle(warningStyle);
+
+        // Excel rows are 1-based (hence rowIndex + 1)
+        int excelRow = rowIndex + 1;
+
+        // Formula: show warning only if USE_DEFAULTS is TRUE and color does not match expected
+        String formula = String.format(
+                "IF(AND(TRIM(UPPER($B$2))=\"TRUE\", TRIM(UPPER(B%d))<>\"%s\"), \"❗ Correct color should be %s\", \"\")",
+                excelRow, expectedColor.toUpperCase(), expectedColor
+        );
+
+        warningCell.setCellFormula(formula);
+    }
+
+
 
     private static CellStyle createRedFontStyle(Workbook workbook, boolean locked, IndexedColors bgColor) {
         CellStyle style = workbook.createCellStyle();
