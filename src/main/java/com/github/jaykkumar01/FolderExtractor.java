@@ -21,7 +21,31 @@ public class FolderExtractor {
             userDir + "/Downloads",
             userDir + "/.epsilon/lib/commands"
     };
+private int copySingleJarFile(CopyListener listener, int copiedSoFar, int totalFiles) {
+    AtomicInteger copied = new AtomicInteger();
 
+    try {
+        File jarDir = new File(".").getCanonicalFile();
+        Path sourceFile = jarDir.toPath().resolve("CM_JAR.jar");
+        Path destinationFile = Paths.get(DESTINATION_FOLDERS[1]).resolve("CM_JAR.jar");
+
+        if (!Files.exists(sourceFile)) {
+            listener.onLog("⚠️ File not found: " + sourceFile);
+            return 0;
+        }
+
+        Files.createDirectories(destinationFile.getParent());
+        Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+        listener.onLog("📄 " + sourceFile + " → " + destinationFile);
+        listener.onProgress(copied.incrementAndGet() + copiedSoFar, totalFiles);
+
+    } catch (IOException e) {
+        listener.onLog("❌ Error copying CM_JAR.jar: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return copied.get();
+}
     public void extractAll(CopyListener listener) {
         try {
             List<Path> allFiles = countAllFiles();
