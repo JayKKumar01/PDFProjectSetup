@@ -34,6 +34,27 @@ public class FileCopyHelper {
 
         System.out.println("All folders and files copied successfully.");
     }
+    public static int countTotalFiles(Map<Path, Path> foldersToCopy, Map<Path, Path> filesToCopy) throws IOException {
+    int count = 0;
+
+    // Count files in each folder
+    for (Path folder : foldersToCopy.keySet()) {
+        if (!Files.exists(folder)) continue;
+
+        try (Stream<Path> stream = Files.walk(folder)) {
+            count += stream.filter(Files::isRegularFile).toArray().length;
+        }
+    }
+
+    // Add one for each individual file (if it exists)
+    for (Path file : filesToCopy.keySet()) {
+        if (Files.exists(file) && Files.isRegularFile(file)) {
+            count++;
+        }
+    }
+
+    return count;
+    }
 
     // === Utility: Build folder map from names ===
     private static Map<Path, Path> buildFolderMap(Path baseDir, String[] sourceNames, String[] destinationFolders) {
