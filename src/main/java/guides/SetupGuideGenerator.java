@@ -9,15 +9,11 @@ import java.io.IOException;
 public class SetupGuideGenerator {
 
     public static void main(String[] args) {
-
-        // === Configurable Variables ===
         String projectName = "MyProject";
-        String setupJarName = "setup.jar";
         String customMethodJarName = "customMethod.jar";
-        String projectFolderName = "MyProject";
-        String workspaceFolderName = "MyWorkspace";
-        String userGuideFolderName = "UserGuides";
+        String workspaceFolderName = projectName + " Workspace";
         String zipFileName = projectName + "_RequiredFiles.zip";
+        String sampleExcel = "SampleInputData.xlsx";
         String outputPath = projectName + "_Setup_Guide.docx";
 
         try (XWPFDocument doc = new XWPFDocument()) {
@@ -25,64 +21,68 @@ public class SetupGuideGenerator {
             // Title
             addStyledParagraph(doc, "🚀 " + projectName + " Setup Guide", 20, true, "004670");
 
-            // User Guides Folder
-            addStyledParagraph(doc, "📚 User Guides Folder", 14, true, "007377");
-            addBodyText(doc,
-                    "Before starting the setup, first extract the zip file and open the \"" + userGuideFolderName + "\" folder.");
-            addBodyText(doc,
-                    "It contains helpful documents that explain how to configure and use the project. Start by reading these guides:");
-            addBodyText(doc,
-                    "- **colors-config-user-guide.docx**: Explains how to set up and customize label colors using the `colors-config.xlsx` file.");
-            addBodyText(doc,
-                    "- **input-data-guide.docx**: Shows how to create the Input Data Excel sheet used for comparing documents. It explains how to fill in file paths and page ranges step by step.");
-
-            // Option 1
+            // Automatic Setup
             addStyledParagraph(doc, "Option 1: Automatic Setup (Recommended)", 14, true, "000000");
             addBodyText(doc, "1. Extract the file: " + zipFileName);
-            addBodyText(doc, "2. Double-click on the " + setupJarName + " file.");
+            addBodyText(doc, "2. Double-click on the setup.jar file.");
             addBodyText(doc, "3. It will automatically place all files and folders in their correct locations.");
-            addItalicText(doc, "✅ That’s it! You're ready to go. Open " + projectFolderName + " in Epsilon.");
+            addItalicText(doc, "✅ That’s it! You're ready to go. Open " + projectName + " in Epsilon.");
 
-            // Option 2
+            // Manual Setup
             addStyledParagraph(doc, "Option 2: Manual Setup", 14, true, "000000");
 
+            // Step 1
             addStyledParagraph(doc, "Step 1: Extract the Zip", 12, true, "000000");
             addBodyText(doc, "Unzip the file:");
             addCodeBlock(doc, zipFileName);
-            addBodyText(doc, "It contains the following files and folders required for the " + projectName + " setup:");
+            addBodyText(doc, "It contains the following files and folders required for the setup:");
 
-            // Extracted contents table WITHOUT userGuideFolderName
             String[][] contents = {
-                    {setupJarName, "JAR file for automatic setup"},
                     {customMethodJarName, "Custom command JAR to be placed manually"},
-                    {projectFolderName, "Project folder"},
-                    {workspaceFolderName, "Workspace folder"}
+                    {projectName, "Project folder"},
+                    {workspaceFolderName, "Workspace folder containing sample input"}
             };
             addTable(doc, contents, new String[]{"File/Folder", "Description"}, "D9D9D9");
 
-            // Placement step
+            // Step 2
             addStyledParagraph(doc, "Step 2: Place Files in Correct Locations", 12, true, "000000");
             addBodyText(doc, "Use the following paths (replace <YourUsername> with your Windows username):");
 
-            // Placement paths table WITHOUT userGuideFolderName
             String[][] paths = {
                     {customMethodJarName, "C:\\Users\\<YourUsername>\\.epsilon\\lib\\commands"},
-                    {projectFolderName, "C:\\Users\\<YourUsername>\\.epsilon\\Projects"},
+                    {projectName, "C:\\Users\\<YourUsername>\\.epsilon\\Projects"},
                     {workspaceFolderName, "C:\\Users\\<YourUsername>\\.epsilon"}
             };
             addTable(doc, paths, new String[]{"Item", "Destination Path"}, "F2F2F2");
-
             addItalicText(doc, "🛠 Tip: If you don’t see the .epsilon folder, enable hidden files in File Explorer.");
+
+            // Step 3
+            addStyledParagraph(doc, "Step 3: Update Sample Input File", 12, true, "000000");
+            addBodyText(doc, "Go to:");
+            addCodeBlock(doc, "C:\\Users\\<YourUsername>\\.epsilon\\" + workspaceFolderName + "\\" + sampleExcel);
+            addBodyText(doc,
+                    "Inside this Excel file:\n- Replace all document paths containing \"JAKUMA5\" with your actual Windows username.\n\nExample:");
+            addCodeBlock(doc, "C:\\Users\\JAKUMA5\\Documents\\MyFile.docx");
+            addBodyText(doc, "Change to:");
+            addCodeBlock(doc, "C:\\Users\\YourUsername\\Documents\\MyFile.docx");
+
+            // Step 4
+            addStyledParagraph(doc, "Step 4: Set Input Excel File in Epsilon", 12, true, "000000");
+            addBodyText(doc, "Open the Epsilon tool.");
+            addBodyText(doc, "Look for the field labeled \"InputData\".");
+            addBodyText(doc, "Paste the full path to the updated " + sampleExcel + " into that field.");
+            addCodeBlock(doc, "C:\\Users\\YourUsername\\.epsilon\\" + workspaceFolderName + "\\" + sampleExcel);
 
             // Notes
             addStyledParagraph(doc, "📝 Notes", 14, true, "000000");
-            addBodyText(doc, "- Make sure Java is installed to run " + setupJarName + ".");
+            addBodyText(doc, "- Make sure Java is installed to run the tools.");
             addBodyText(doc, "- Do not rename any folders before placing them.");
             addBodyText(doc, "- Restart any related IDE or tools after setup.");
 
             // Done
             addStyledParagraph(doc, "🎉 Done!", 14, true, "000000");
-            addBodyText(doc, "You’re now fully set up to use " + projectName + ". If you face any issues, reach out to the project maintainer.");
+            addBodyText(doc, "You’re now fully set up to use " + projectName +
+                    ". If you face any issues, reach out to the project maintainer.");
 
             try (FileOutputStream out = new FileOutputStream(outputPath)) {
                 doc.write(out);
